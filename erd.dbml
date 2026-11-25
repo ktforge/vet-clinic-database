@@ -1,0 +1,58 @@
+// Vet clinic database (final version after 04_edit_schema.sql)
+// Paste this into dbdiagram.io to see the diagram
+
+Table owners {
+  owner_id serial [pk]
+  first_name varchar(50) [not null]
+  last_name varchar(50) [not null]
+  phone varchar(20) [not null]
+  email varchar(100)
+}
+
+Table pets {
+  pet_id serial [pk]
+  owner_id integer [not null, ref: > owners.owner_id]
+  name varchar(50) [not null]
+  species varchar(30) [not null]
+  breed varchar(50)
+  birth_date date
+}
+
+Table microchips {
+  chip_number varchar(15) [pk]
+  pet_id integer [not null, unique, ref: - pets.pet_id]
+  implant_date date [not null]
+}
+
+Table vets {
+  vet_id serial [pk]
+  first_name varchar(50) [not null]
+  last_name varchar(50) [not null]
+  license_number varchar(20) [not null, unique]
+}
+
+Table appointments {
+  appointment_id serial [pk]
+  pet_id integer [not null, ref: > pets.pet_id]
+  vet_id integer [not null, ref: > vets.vet_id]
+  appointment_time timestamp [not null]
+  reason text
+  weight_lbs numeric(5,1)
+}
+
+Table treatments {
+  treatment_id serial [pk]
+  name varchar(100) [not null, unique]
+  price numeric(8,2) [not null, note: 'CHECK price >= 0']
+}
+
+Table appointment_treatments {
+  appointment_id integer [ref: > appointments.appointment_id]
+  treatment_id integer [ref: > treatments.treatment_id]
+  quantity integer [not null, default: 1, note: 'CHECK quantity > 0']
+  price_charged numeric(8,2) [not null, note: 'CHECK price_charged >= 0']
+
+  indexes {
+    (appointment_id, treatment_id) [pk]
+  }
+}
